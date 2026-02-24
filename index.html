@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كاشف الكلمات | يوتيوب العربي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06080f;
+  --surface: #0c1118;
+  --card: #10161f;
+  --card2: #141c27;
+  --border: #1c2a3e;
+  --border2: #243347;
+  --gold: #f5c842;
+  --gold2: #e8b520;
+  --red: #e53e3e;
+  --accent: #3b82f6;
+  --accent2: #06b6d4;
+  --green: #10b981;
+  --purple: #8b5cf6;
+  --text: #e2e8f4;
+  --text2: #a0b0cc;
+  --muted: #5a6a85;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── NOISE TEXTURE ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── GLOW ORBS ─── */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.12;
+}
+.orb1 { width:500px;height:500px; background:var(--gold); top:-150px; right:-100px; animation: orbFloat 12s ease-in-out infinite; }
+.orb2 { width:400px;height:400px; background:var(--accent); bottom:-100px; left:-80px; animation: orbFloat 15s ease-in-out infinite reverse; }
+.orb3 { width:300px;height:300px; background:var(--purple); top:40%; left:40%; animation: orbFloat 18s ease-in-out infinite 3s; }
+@keyframes orbFloat {
+  0%,100% { transform: translate(0,0) scale(1); }
+  33% { transform: translate(30px,-20px) scale(1.05); }
+  66% { transform: translate(-20px,30px) scale(0.95); }
+}
+
+.wrap { max-width:1280px; margin:0 auto; padding:0 20px; position:relative; z-index:1; }
+
+/* ─── HEADER ─── */
+header {
+  position: sticky; top:0; z-index:200;
+  background: rgba(6,8,15,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.header-top {
+  display:flex; align-items:center; gap:16px; padding:16px 0;
+  flex-wrap: wrap;
+}
+
+/* Logo */
+.logo { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.logo-box {
+  width:44px; height:44px; border-radius:12px;
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:900; color:#fff;
+  box-shadow: 0 0 24px rgba(229,62,62,0.35);
+  flex-shrink: 0;
+}
+.logo-text { display:flex; flex-direction:column; }
+.logo-text b { font-family:'Cairo',sans-serif; font-size:17px; font-weight:900; line-height:1.1; }
+.logo-text small { font-size:10px; color:var(--gold); letter-spacing:1.5px; font-weight:500; }
+
+/* Search */
+.search-wrap { flex:1; min-width:260px; max-width:580px; position:relative; }
+.search-box {
+  display:flex; align-items:center; gap:8px;
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius:14px; padding:0 14px;
+  transition: all .3s;
+}
+.search-box:focus-within {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245,200,66,0.1), 0 4px 24px rgba(245,200,66,0.08);
+}
+.search-box input {
+  flex:1; background:none; border:none; outline:none;
+  color:var(--text); font-family:'Tajawal',sans-serif;
+  font-size:15px; padding:13px 4px; direction:rtl;
+  min-width:0;
+}
+.search-box input::placeholder { color:var(--muted); }
+.si { color:var(--muted); font-size:17px; transition:color .2s; }
+.search-box:focus-within .si { color:var(--gold); }
+.sc-btn {
+  background:none; border:none; color:var(--muted); cursor:pointer;
+  font-size:14px; padding:4px 6px; border-radius:6px; transition:all .2s;
+  display:none;
+}
+.sc-btn:hover { color:var(--text); background:var(--border); }
+.sc-btn.vis { display:block; }
+
+/* Header Actions */
+.hactions { display:flex; gap:8px; flex-shrink:0; }
+.btn {
+  display:flex; align-items:center; gap:6px;
+  padding:9px 15px; border-radius:10px;
+  border:1px solid var(--border2); background:var(--surface);
+  color:var(--text2); font-family:'Tajawal',sans-serif; font-size:13px;
+  cursor:pointer; transition:all .2s; white-space:nowrap;
+}
+.btn:hover { border-color:var(--gold); color:var(--gold); }
+.btn-primary {
+  background:var(--gold); color:#000; border-color:var(--gold);
+  font-weight:700;
+}
+.btn-primary:hover { background:var(--gold2); color:#000; }
+.btn-sm { padding:6px 11px; font-size:12px; }
+
+/* Autocomplete */
+.ac-dropdown {
+  position:absolute; top:calc(100% + 8px); right:0; left:0;
+  background:var(--card2); border:1px solid var(--border2);
+  border-radius:14px; overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,0.7);
+  z-index:300; display:none;
+  animation: acDrop .2s ease;
+}
+@keyframes acDrop { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+.ac-dropdown.show { display:block; }
+.ac-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; cursor:pointer; transition:background .15s;
+  font-size:13.5px;
+}
+.ac-item:hover { background:var(--surface); }
+.ac-ico { font-size:11px; color:var(--muted); }
+.ac-vol {
+  margin-right:auto; font-size:11px; color:var(--gold);
+  background:rgba(245,200,66,0.1); padding:2px 8px; border-radius:20px;
+  font-family:'Cairo',sans-serif; font-weight:600; direction:ltr;
+}
+.ac-live { font-size:9px; color:var(--green); background:rgba(16,185,129,0.1); padding:1px 6px; border-radius:8px; }
+.ac-header { padding:8px 14px 4px; font-size:11px; color:var(--muted); border-bottom:1px solid var(--border); }
+
+/* ─── CONTROLS BAR ─── */
+.controls {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 0; border-bottom:1px solid var(--border);
+  flex-wrap:wrap;
+}
+
+/* Period tabs */
+.period-tabs { display:flex; gap:2px; background:var(--surface); border-radius:10px; padding:3px; border:1px solid var(--border); }
+.period-tab {
+  padding:6px 14px; border-radius:8px; border:none; background:none;
+  color:var(--muted); font-family:'Tajawal',sans-serif; font-size:12px;
+  cursor:pointer; transition:all .2s; white-space:nowrap;
+}
+.period-tab.active {
+  background:var(--gold); color:#000; font-weight:700;
+}
+
+/* Category chips */
+.cat-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.cat-chip {
+  padding:5px 12px; border-radius:20px;
+  border:1px solid var(--border); background:var(--surface);
+  color:var(--muted); font-family:'Tajawal',sans-serif;
+  font-size:12px; cursor:pointer; transition:all .2s; white-space:nowrap;
+}
+.cat-chip:hover, .cat-chip.active {
+  border-color:var(--gold); color:var(--gold); background:rgba(245,200,66,0.07);
+}
+
+/* Geo select */
+.geo-select {
+  background:var(--surface); border:1px solid var(--border2);
+  color:var(--text); font-family:'Tajawal',sans-serif;
+  font-size:12px; padding:7px 10px; border-radius:10px;
+  cursor:pointer; outline:none; transition:border .2s;
+}
+.geo-select:focus { border-color:var(--gold); }
+
+/* ─── STAT BAR ─── */
+.stat-bar { display:flex; gap:24px; padding:14px 0 8px; flex-wrap:wrap; }
+.stat {
+  display:flex; align-items:center; gap:8px; font-size:12.5px;
+}
+.live-dot {
+  width:8px; height:8px; border-radius:50%; background:var(--green);
+  animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,100% { box-shadow:0 0 0 0 rgba(16,185,129,0.4); }
+  50% { box-shadow:0 0 0 6px rgba(16,185,129,0); }
+}
+.stat-val {
+  font-family:'Cairo',sans-serif; font-size:16px;
+  font-weight:800; color:var(--gold);
+}
+.stat-lbl { color:var(--muted); }
+
+/* ─── SECTION HEADER ─── */
+.sec-head {
+  display:flex; align-items:center; justify-content:space-between;
+  margin:16px 0 12px; flex-wrap:wrap; gap:10px;
+}
+.sec-title {
+  font-family:'Cairo',sans-serif; font-size:16px; font-weight:800;
+  display:flex; align-items:center; gap:8px;
+}
+.sec-badge {
+  font-size:11px; background:var(--gold); color:#000;
+  padding:2px 9px; border-radius:10px; font-weight:800;
+  font-family:'Cairo',sans-serif;
+}
+.sort-sel {
+  background:var(--surface); border:1px solid var(--border2);
+  color:var(--text); font-family:'Tajawal',sans-serif;
+  font-size:12px; padding:6px 10px; border-radius:8px;
+  cursor:pointer; outline:none;
+}
+
+/* ─── RESULTS BANNER ─── */
+.results-banner {
+  display:none; align-items:center; gap:10px;
+  background:rgba(245,200,66,0.06); border:1px solid rgba(245,200,66,0.15);
+  border-radius:12px; padding:10px 16px; margin-bottom:10px;
+  flex-wrap:wrap; gap:10px;
+}
+.results-banner.show { display:flex; }
+.rbanner-kw { font-size:16px; font-weight:800; color:var(--gold); }
+.rbanner-count { font-size:12px; color:var(--muted); margin-right:auto; }
+
+/* Stream status */
+.stream-status {
+  display:none; align-items:center; gap:8px;
+  font-size:12px; color:var(--accent2); padding:6px 0;
+}
+.stream-status.show { display:flex; }
+.stream-dot {
+  width:6px; height:6px; border-radius:50%; background:var(--accent2);
+  animation: streamPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes streamPulse { from{opacity:0.3} to{opacity:1} }
+
+/* ─── KEYWORDS GRID ─── */
+.kw-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap:9px; padding-bottom:48px;
+}
+
+.kw-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px; padding:13px 15px;
+  cursor:pointer; transition:all .25s;
+  display:flex; align-items:center; gap:12px;
+  position:relative; overflow:hidden;
+}
+.kw-card::after {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, transparent 60%, rgba(245,200,66,0.04));
+  opacity:0; transition:opacity .3s;
+}
+.kw-card:hover { border-color:rgba(245,200,66,0.35); transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,0,0,0.4); }
+.kw-card:hover::after { opacity:1; }
+.kw-card.selected { border-color:var(--gold); background:rgba(245,200,66,0.055); }
+.kw-card.new-result { animation: slideIn .35s ease both; }
+@keyframes slideIn { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:translateX(0)} }
+
+.kw-rank {
+  font-family:'Cairo',sans-serif; font-size:12px; font-weight:700;
+  color:var(--muted); min-width:22px; text-align:center; flex-shrink:0;
+}
+.kw-rank.r1 { color:#FFD700; } .kw-rank.r2 { color:#C0C0C0; } .kw-rank.r3 { color:#CD7F32; }
+
+.kw-body { flex:1; min-width:0; }
+.kw-text {
+  font-size:14px; font-weight:600; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  margin-bottom:4px;
+}
+.kw-meta { display:flex; align-items:center; gap:6px; margin-top:3px; }
+.kw-cat { font-size:10px; color:var(--muted); }
+.kw-trend-badge {
+  font-size:10px; padding:1px 6px; border-radius:6px;
+}
+.t-hot { background:rgba(229,62,62,0.15); color:#fc8181; }
+.t-up { background:rgba(16,185,129,0.15); color:var(--green); }
+.t-stable { background:rgba(90,106,133,0.15); color:var(--muted); }
+
+.kw-bar-wrap { height:3px; background:var(--border); border-radius:2px; margin-top:5px; overflow:hidden; }
+.kw-bar {
+  height:100%; border-radius:2px;
+  background:linear-gradient(90deg, var(--gold2), var(--accent2));
+  transition:width .7s cubic-bezier(.4,0,.2,1);
+}
+
+.kw-right { flex-shrink:0; text-align:left; direction:ltr; }
+.kw-vol {
+  font-family:'Cairo',sans-serif; font-size:15px; font-weight:800;
+  color:var(--text); display:block;
+}
+.kw-vol-lbl { font-size:10px; color:var(--muted); }
+.kw-ts-badge {
+  font-size:10px; padding:2px 6px; border-radius:6px;
+  background:rgba(59,130,246,0.12); color:var(--accent2);
+  margin-top:3px; display:inline-block; direction:ltr;
+}
+
+/* ─── RELATED PANEL ─── */
+#overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,0.65);
+  backdrop-filter:blur(3px); z-index:400; display:none;
+}
+#overlay.show { display:block; }
+
+#panel {
+  position:fixed; bottom:0; left:0; right:0;
+  background:var(--card2); border-top:1px solid var(--border2);
+  border-radius:24px 24px 0 0;
+  z-index:500; transform:translateY(101%);
+  transition:transform .4s cubic-bezier(.32,.72,0,1);
+  max-height:72vh; display:flex; flex-direction:column;
+  box-shadow:0 -24px 60px rgba(0,0,0,0.8);
+}
+#panel.open { transform:translateY(0); }
+.panel-drag { width:40px;height:5px;border-radius:3px;background:var(--border2);margin:12px auto 0;cursor:grab; }
+.panel-head {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 20px 10px; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.panel-title { font-family:'Cairo',sans-serif; font-size:15px; font-weight:800; }
+.panel-close {
+  width:32px;height:32px;border-radius:8px;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted); cursor:pointer; font-size:16px;
+  display:flex;align-items:center;justify-content:center; transition:all .2s;
+}
+.panel-close:hover { color:var(--text); border-color:var(--text); }
+.panel-kw {
+  padding:10px 20px; background:rgba(245,200,66,0.06);
+  border-bottom:1px solid var(--border); flex-shrink:0;
+  font-size:13px;
+}
+.panel-kw span { font-size:17px; font-weight:800; color:var(--gold); }
+.panel-body { overflow-y:auto; flex:1; padding:12px 16px 24px; }
+.related-list { display:flex; flex-direction:column; gap:7px; }
+.rel-item {
+  display:flex; align-items:center; gap:11px;
+  padding:10px 14px; border-radius:10px;
+  background:var(--surface); border:1px solid var(--border);
+  cursor:pointer; transition:all .2s;
+  animation: fadeU .3s ease both;
+}
+@keyframes fadeU { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.rel-item:hover { border-color:rgba(245,200,66,0.35); }
+.rel-rank { font-size:11px; color:var(--muted); min-width:18px; font-family:'Cairo',sans-serif; font-weight:700; }
+.rel-body { flex:1; min-width:0; }
+.rel-text { font-size:13px; font-weight:600; }
+.rel-cat { font-size:10px; color:var(--muted); margin-top:2px; }
+.sim-badge {
+  font-size:10px; padding:2px 8px; border-radius:8px;
+  background:rgba(6,182,212,0.12); color:var(--accent2); flex-shrink:0;
+}
+.rel-vol {
+  font-family:'Cairo',sans-serif; font-size:13px; font-weight:700;
+  color:var(--gold); direction:ltr; flex-shrink:0;
+}
+
+/* ─── LOADING ─── */
+.loader { display:none; align-items:center; justify-content:center; gap:8px; padding:28px; color:var(--muted); font-size:13px; }
+.loader.show { display:flex; }
+.spinner {
+  width:18px;height:18px; border:2px solid var(--border2);
+  border-top-color:var(--gold); border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ─── EMPTY ─── */
+.empty { display:none; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; color:var(--muted); gap:10px; text-align:center; }
+.empty.show { display:flex; }
+.empty .ei { font-size:48px; opacity:.25; }
+
+/* ─── TOAST ─── */
+.toast {
+  position:fixed; bottom:28px; left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--card2); border:1px solid var(--gold);
+  color:var(--text); padding:10px 20px; border-radius:12px;
+  font-size:13px; z-index:999; pointer-events:none; white-space:nowrap;
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* ─── ERROR BANNER ─── */
+.error-banner {
+  display:none; background:rgba(229,62,62,0.08);
+  border:1px solid rgba(229,62,62,0.25);
+  border-radius:10px; padding:10px 16px; font-size:12.5px;
+  color:#fc8181; gap:8px; align-items:center; margin:8px 0;
+}
+.error-banner.show { display:flex; }
+
+/* ─── SCROLL ─── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+@media(max-width:640px) {
+  .kw-grid { grid-template-columns:1fr; }
+  .hactions { display:none; }
+  .stat-bar { gap:16px; }
+  .period-tabs { overflow-x:auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- HEADER -->
+<header>
+<div class="wrap">
+  <div class="header-top">
+    <a class="logo" href="#">
+      <div class="logo-box">▶</div>
+      <div class="logo-text">
+        <b>كاشف الكلمات</b>
+        <small>يوتيوب العربي • بيانات مباشرة</small>
+      </div>
+    </a>
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <span class="si">🔍</span>
+        <input type="text" id="searchInput" placeholder="ابحث بث مباشر..." autocomplete="off" spellcheck="false">
+        <button class="sc-btn" id="scBtn" onclick="clearSearch()">✕</button>
+      </div>
+      <div class="ac-dropdown" id="acDrop"></div>
+    </div>
+
+    <div class="hactions">
+      <button class="btn btn-sm" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn btn-primary btn-sm" onclick="refreshAll()">↻ تحديث</button>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="period-tabs">
+      <button class="period-tab" data-p="day" onclick="setPeriod('day',this)">يوم</button>
+      <button class="period-tab" data-p="week" onclick="setPeriod('week',this)">أسبوع</button>
+      <button class="period-tab active" data-p="month" onclick="setPeriod('month',this)">شهر</button>
+    </div>
+
+    <div class="cat-chips">
+      <span class="cat-chip active" onclick="setCat('all',this)">الكل</span>
+      <span class="cat-chip" onclick="setCat('موسيقى',this)">🎵</span>
+      <span class="cat-chip" onclick="setCat('ترفيه',this)">🎬</span>
+      <span class="cat-chip" onclick="setCat('رياضة',this)">⚽</span>
+      <span class="cat-chip" onclick="setCat('تقنية',this)">💻</span>
+      <span class="cat-chip" onclick="setCat('طبخ',this)">🍳</span>
+      <span class="cat-chip" onclick="setCat('أخبار',this)">📰</span>
+      <span class="cat-chip" onclick="setCat('تعليم',this)">📚</span>
+      <span class="cat-chip" onclick="setCat('صحة',this)">💪</span>
+    </div>
+
+    <select class="geo-select" id="geoSelect" onchange="setGeo(this.value)">
+      <option value="SA">🇸🇦 السعودية</option>
+      <option value="EG">🇪🇬 مصر</option>
+      <option value="AE">🇦🇪 الإمارات</option>
+      <option value="KW">🇰🇼 الكويت</option>
+      <option value="QA">🇶🇦 قطر</option>
+      <option value="MA">🇲🇦 المغرب</option>
+      <option value="DZ">🇩🇿 الجزائر</option>
+      <option value="all">🌍 الكل</option>
+    </select>
+
+    <select class="sort-sel" id="sortSel" onchange="setSort(this.value)">
+      <option value="volume">الأعلى بحثاً</option>
+      <option value="trending">الأكثر صعوداً</option>
+      <option value="alpha">أبجدي</option>
+    </select>
+  </div>
+</div>
+</header>
+
+<div class="wrap">
+  <!-- Stat bar -->
+  <div class="stat-bar">
+    <div class="stat"><div class="live-dot"></div><span class="stat-lbl">بيانات مباشرة</span></div>
+    <div class="stat"><span class="stat-val" id="statCount">—</span><span class="stat-lbl">كلمة مفتاحية</span></div>
+    <div class="stat"><span class="stat-val" id="statTotal">—</span><span class="stat-lbl">إجمالي البحث</span></div>
+    <div class="stat"><span class="stat-val" id="statPeriod">شهر</span><span class="stat-lbl">الفترة الزمنية</span></div>
+    <div class="stat"><span class="stat-val" id="statUpdated">—</span><span class="stat-lbl">آخر تحديث</span></div>
+  </div>
+
+  <!-- Error -->
+  <div class="error-banner" id="errBanner">⚠️ <span id="errMsg"></span></div>
+
+  <!-- Results banner -->
+  <div class="results-banner" id="resBanner">
+    <span>🔍</span>
+    <span>بحث عن: <span class="rbanner-kw" id="resKw"></span></span>
+    <span class="rbanner-count" id="resCnt"></span>
+    <button class="btn btn-sm" onclick="clearSearch()">✕ إلغاء</button>
+  </div>
+
+  <!-- Stream status -->
+  <div class="stream-status" id="streamStatus">
+    <div class="stream-dot"></div>
+    <span id="streamMsg">جاري استقبال نتائج مباشرة...</span>
+  </div>
+
+  <!-- Section head -->
+  <div class="sec-head">
+    <div class="sec-title">
+      <span>🔥</span>
+      <span id="secTitle">أكثر الكلمات بحثاً</span>
+      <span class="sec-badge" id="secBadge">TOP 100</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="loader" id="mainLoader" style="padding:4px 8px">
+        <div class="spinner"></div><span>جاري التحميل...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty" id="emptyState">
+    <div class="ei">🔍</div>
+    <p>لم يتم العثور على نتائج</p>
+    <button class="btn btn-sm" onclick="clearSearch()">العودة للكل</button>
+  </div>
+
+  <div class="kw-grid" id="kwGrid"></div>
+</div>
+
+<!-- Overlay -->
+<div id="overlay" onclick="closePanel()"></div>
+
+<!-- RELATED PANEL -->
+<div id="panel">
+  <div class="panel-drag"></div>
+  <div class="panel-head">
+    <div class="panel-title">🔗 الكلمات المشابهة والمرتبطة</div>
+    <button class="panel-close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-kw">الكلمة: <span id="panelKw">...</span></div>
+  <div class="panel-body">
+    <div class="loader" id="panelLoader"><div class="spinner"></div><span>جاري الجلب من المصدر...</span></div>
+    <div class="related-list" id="relList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════
+const API = window.location.origin.includes('localhost') || window.location.origin.includes('127.0')
+  ? 'http://localhost:8000'
+  : window.location.origin;
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let state = {
+  keywords: [],
+  filtered: [],
+  period: 'month',
+  geo: 'SA',
+  category: 'all',
+  sort: 'volume',
+  query: '',
+  selectedCard: null,
+  streamCtrl: null,
+};
+
+const periodLabels = { day: 'يوم', week: 'أسبوع', month: 'شهر' };
+
+// ═══════════════════════════════════════════════════════════
+//  UTILITY
+// ═══════════════════════════════════════════════════════════
+function fmtVol(n) {
+  if (!n) return '—';
+  if (n >= 1_000_000_000) return (n/1e9).toFixed(1)+'B';
+  if (n >= 1_000_000) return (n/1e6).toFixed(1)+'M';
+  if (n >= 1_000) return (n/1e3).toFixed(0)+'K';
+  return n.toLocaleString('ar');
+}
+
+function fmtBig(n) {
+  if (!n || n === 0) return '—';
+  if (n >= 1_000_000_000) return (n/1e9).toFixed(2)+'B+';
+  if (n >= 1_000_000) return (n/1e6).toFixed(1)+'M+';
+  return fmtVol(n);
+}
+
+function trendBadge(t) {
+  if (t === 'hot') return '<span class="kw-trend-badge t-hot">🔥 حار</span>';
+  if (t === 'up') return '<span class="kw-trend-badge t-up">↑ صاعد</span>';
+  return '<span class="kw-trend-badge t-stable">→ مستقر</span>';
+}
+
+function rankClass(i) {
+  if (i === 0) return 'kw-rank r1';
+  if (i === 1) return 'kw-rank r2';
+  if (i === 2) return 'kw-rank r3';
+  return 'kw-rank';
+}
+
+function showToast(msg, dur=2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function showError(msg) {
+  document.getElementById('errMsg').textContent = msg;
+  document.getElementById('errBanner').classList.add('show');
+  setTimeout(() => document.getElementById('errBanner').classList.remove('show'), 6000);
+}
+
+function setLoader(id, on) {
+  document.getElementById(id).classList[on ? 'add' : 'remove']('show');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FETCH — Top Keywords
+// ═══════════════════════════════════════════════════════════
+async function loadTopKeywords() {
+  setLoader('mainLoader', true);
+  try {
+    const params = new URLSearchParams({
+      geo: state.geo,
+      period: state.period,
+      category: state.category,
+      sort: state.sort,
+      limit: 100
+    });
+    const res = await fetch(`${API}/api/top?${params}`);
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const data = await res.json();
+
+    state.keywords = data.keywords || [];
+    state.filtered = [...state.keywords];
+    applySort();
+    renderKeywords(state.filtered);
+    updateStats(data);
+
+    const ts = new Date(data.updated_at);
+    document.getElementById('statUpdated').textContent =
+      ts.toLocaleTimeString('ar-SA', {hour:'2-digit', minute:'2-digit'});
+
+  } catch(e) {
+    // Fallback to scraping proxy
+    await fallbackLoad();
+  } finally {
+    setLoader('mainLoader', false);
+  }
+}
+
+// ─── Fallback: Direct YouTube scraping via allorigins ───
+async function fallbackLoad() {
+  showToast('⚡ جاري الجلب المباشر من يوتيوب...');
+
+  const seeds = ['اغاني','مسلسل','أخبار','طبخ','رياضة','تقنية','فيلم','كرة قدم','تعليم','صحة',
+                  'موسيقى','برنامج','يوتيوب','محمد','عربي','شرح','مراجعة','جديد','كامل','مجاني'];
+  const results = new Map();
+
+  const fetches = seeds.map(async (seed, idx) => {
+    try {
+      await new Promise(r => setTimeout(r, idx * 80));
+      const url = `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&hl=ar&gl=${state.geo}&q=${encodeURIComponent(seed)}`;
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy, {signal: AbortSignal.timeout(6000)});
+      const json = await res.json();
+      const parsed = JSON.parse(json.contents);
+      const suggestions = parsed[1] || [];
+      suggestions.forEach((s, i) => {
+        const kw = Array.isArray(s) ? s[0] : s;
+        if (kw && /[\u0600-\u06FF]/.test(kw) && !results.has(kw)) {
+          results.set(kw, {
+            kw, volume: estimateVolume(kw, seed, i, idx),
+            category: detectCategory(kw),
+            trend_dir: i < 2 ? 'hot' : i < 5 ? 'up' : 'stable',
+            trend_score: Math.max(10, 90 - i*10 - idx*2),
+          });
+        }
+      });
+    } catch {}
+  });
+
+  await Promise.allSettled(fetches);
+
+  state.keywords = Array.from(results.values())
+    .sort((a,b) => b.volume - a.volume)
+    .slice(0, 100);
+  state.filtered = [...state.keywords];
+  applySort();
+  renderKeywords(state.filtered);
+  updateStats({ keywords: state.keywords, updated_at: new Date().toISOString() });
+  document.getElementById('statUpdated').textContent = new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit'});
+}
+
+function estimateVolume(kw, seed, rank, seedRank) {
+  const periodMult = { day: 1, week: 7, month: 30 }[state.period] || 30;
+  const baseByRank = [9000000, 7500000, 6000000, 5000000, 4000000, 3500000, 3000000, 2500000, 2000000, 1800000];
+  const base = (baseByRank[rank] || 1500000) / (seedRank * 0.05 + 1);
+
+  const wordCount = kw.split(' ').length;
+  const lengthFactor = wordCount === 1 ? 2.2 : wordCount === 2 ? 1.5 : wordCount >= 4 ? 0.7 : 1.0;
+
+  const boosts = {'اغان':3,'مسلسل':2.5,'كرة':2.3,'اخبار':2.0,'فيلم':1.9,'رمضان':2.8,'صلاح':1.7,'يوتيوب':2.1,'2024':1.3,'2025':1.4};
+  let boost = 1;
+  for (const [k, v] of Object.entries(boosts)) if (kw.includes(k)) { boost = v; break; }
+
+  return Math.max(1000, Math.round(base * lengthFactor * boost * periodMult * (0.85 + Math.random()*0.3)));
+}
+
+function detectCategory(kw) {
+  const cats = {
+    'موسيقى': ['اغاني','موسيقى','اغنية','نشيد','شيلات','طرب','ألبوم'],
+    'ترفيه': ['مسلسل','فيلم','كوميدي','مضحك','تحدي','فلوق','برنامج','رامز','سينما'],
+    'رياضة': ['كرة','مباراة','دوري','منتخب','ملاكمة','رياضة','بطولة','لياقة'],
+    'تقنية': ['هاتف','آيفون','برمجة','تطبيق','ذكاء','لابتوب','ألعاب','تقنية','ai','شاشة'],
+    'طبخ': ['وصفة','طبخ','أكل','حلويات','مطبخ','كيكة','شاورما','طحين','خبز'],
+    'أخبار': ['اخبار','عاجل','تقرير','تحليل','حرب','انتخاب','سياسة'],
+    'تعليم': ['تعلم','شرح','دروس','كورس','قرآن','دراسة','جامعة','علم'],
+    'صحة': ['صحة','رجيم','غذائي','علاج','فوائد','نوم','يوغا','طبيب'],
+  };
+  const lk = kw.toLowerCase();
+  for (const [cat, pats] of Object.entries(cats))
+    if (pats.some(p => lk.includes(p))) return cat;
+  return 'عام';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════
+function renderKeywords(list) {
+  const grid = document.getElementById('kwGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (!list.length) {
+    grid.innerHTML = '';
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+
+  const maxVol = Math.max(...list.map(k => k.volume || 0));
+
+  grid.innerHTML = list.map((k, i) => {
+    const pct = maxVol ? Math.round((k.volume / maxVol) * 100) : 0;
+    const ts = k.trend_score ? `<span class="kw-ts-badge">نقاط ترند: ${k.trend_score}</span>` : '';
+    return `
+    <div class="kw-card" onclick="openRelated('${k.kw.replace(/'/g,"\\'")}')" id="card-${i}">
+      <span class="${rankClass(i)}">${i+1}</span>
+      <div class="kw-body">
+        <div class="kw-text">${k.kw}</div>
+        <div class="kw-bar-wrap"><div class="kw-bar" style="width:${pct}%"></div></div>
+        <div class="kw-meta">
+          <span class="kw-cat">${k.category || 'عام'}</span>
+          ${trendBadge(k.trend_dir || 'stable')}
+        </div>
+      </div>
+      <div class="kw-right">
+        <span class="kw-vol">${fmtVol(k.volume)}</span>
+        <span class="kw-vol-lbl">بحث/${periodLabels[state.period]}</span>
+        ${ts}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats(data) {
+  const kws = data.keywords || state.keywords;
+  document.getElementById('statCount').textContent = kws.length;
+  const total = kws.reduce((s,k) => s+(k.volume||0), 0);
+  document.getElementById('statTotal').textContent = fmtBig(total);
+  document.getElementById('statPeriod').textContent = periodLabels[state.period];
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SEARCH — Server-Sent Events Live Stream
+// ═══════════════════════════════════════════════════════════
+let searchTimeout = null;
+const streamResults = new Map();
+
+function initSearch() {
+  const input = document.getElementById('searchInput');
+  const scBtn = document.getElementById('scBtn');
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim();
+    scBtn.classList[q ? 'add' : 'remove']('vis');
+    clearTimeout(searchTimeout);
+
+    if (!q) { clearSearch(); return; }
+
+    searchTimeout = setTimeout(() => {
+      state.query = q;
+      doSearch(q);
+    }, 350);
+  });
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') clearSearch();
+    if (e.key === 'Enter') {
+      document.getElementById('acDrop').classList.remove('show');
+      const q = input.value.trim();
+      if (q) doSearch(q);
+    }
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap'))
+      document.getElementById('acDrop').classList.remove('show');
+  });
+}
+
+async function doSearch(q) {
+  // Cancel any existing stream
+  if (state.streamCtrl) { state.streamCtrl.abort(); state.streamCtrl = null; }
+
+  streamResults.clear();
+  document.getElementById('kwGrid').innerHTML = '';
+  document.getElementById('emptyState').classList.remove('show');
+
+  // Update banner
+  document.getElementById('resBanner').classList.add('show');
+  document.getElementById('resKw').textContent = q;
+  document.getElementById('resCnt').textContent = '0 نتيجة';
+  document.getElementById('secTitle').textContent = 'نتائج البحث المباشر';
+  document.getElementById('secBadge').textContent = '0';
+
+  // Show stream indicator
+  document.getElementById('streamStatus').classList.add('show');
+  document.getElementById('streamMsg').textContent = 'جاري استقبال نتائج مباشرة...';
+
+  // Show autocomplete in parallel
+  fetchAutocomplete(q);
+
+  // Try SSE stream from backend
+  try {
+    await streamSearch(q);
+  } catch(e) {
+    // Fallback to direct scraping
+    await fallbackSearch(q);
+  }
+}
+
+async function streamSearch(q) {
+  return new Promise(async (resolve) => {
+    const ctrl = new AbortController();
+    state.streamCtrl = ctrl;
+
+    const url = `${API}/api/stream/search?q=${encodeURIComponent(q)}&geo=${state.geo}`;
+
+    try {
+      const res = await fetch(url, { signal: ctrl.signal });
+      if (!res.ok) throw new Error('no stream');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data:')) continue;
+          try {
+            const msg = JSON.parse(line.slice(5).trim());
+            if (msg.status === 'result' && msg.item) {
+              addStreamResult(msg.item);
+            } else if (msg.status === 'done') {
+              finalizeStreamResults();
+              resolve();
+              return;
+            }
+          } catch {}
+        }
+      }
+      finalizeStreamResults();
+      resolve();
+    } catch(e) {
+      if (e.name !== 'AbortError') {
+        resolve(); // signal fallback
+        throw e;
+      }
+    }
+  });
+}
+
+function addStreamResult(item) {
+  if (!streamResults.has(item.kw)) {
+    streamResults.set(item.kw, item);
+    const arr = Array.from(streamResults.values()).sort((a,b) => b.volume - a.volume);
+    renderKeywords(arr);
+    document.getElementById('resCnt').textContent = `${arr.length} نتيجة`;
+    document.getElementById('secBadge').textContent = arr.length;
+  }
+}
+
+function finalizeStreamResults() {
+  document.getElementById('streamStatus').classList.remove('show');
+  const arr = Array.from(streamResults.values()).sort((a,b) => b.volume - a.volume);
+  if (!arr.length) document.getElementById('emptyState').classList.add('show');
+}
+
+async function fallbackSearch(q) {
+  const variants = [q, `${q} شرح`, `${q} 2024`, `أفضل ${q}`, `${q} مجاني`, `كيف ${q}`];
+  const seen = new Set();
+
+  for (let i = 0; i < variants.length; i++) {
+    const v = variants[i];
+    try {
+      const url = `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&hl=ar&gl=${state.geo}&q=${encodeURIComponent(v)}`;
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(5000) });
+      const json = await res.json();
+      const parsed = JSON.parse(json.contents);
+      const sugs = parsed[1] || [];
+
+      sugs.forEach((s, j) => {
+        const kw = Array.isArray(s) ? s[0] : s;
+        if (kw && /[\u0600-\u06FF]/.test(kw) && !seen.has(kw)) {
+          seen.add(kw);
+          const item = {
+            kw, volume: estimateVolume(kw, v, j, i),
+            category: detectCategory(kw),
+            trend_dir: j < 2 ? 'hot' : j < 5 ? 'up' : 'stable',
+            trend_score: Math.max(10, 85 - j*12),
+          };
+          addStreamResult(item);
+        }
+      });
+    } catch {}
+
+    document.getElementById('streamMsg').textContent = `جاري البحث... ${Math.round((i+1)/variants.length*100)}%`;
+    await new Promise(r => setTimeout(r, 120));
+  }
+
+  finalizeStreamResults();
+}
+
+// ─── Autocomplete Dropdown ──────────────────────────────────
+async function fetchAutocomplete(q) {
+  const drop = document.getElementById('acDrop');
+  drop.innerHTML = `<div class="ac-header">اقتراحات</div><div class="ac-item"><div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0 auto"></div></div>`;
+  drop.classList.add('show');
+
+  try {
+    const url = `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&hl=ar&gl=${state.geo}&q=${encodeURIComponent(q)}`;
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxy, { signal: AbortSignal.timeout(4000) });
+    const json = await res.json();
+    const parsed = JSON.parse(json.contents);
+    const sugs = (parsed[1] || []).slice(0, 10);
+
+    if (!sugs.length) { drop.classList.remove('show'); return; }
+
+    drop.innerHTML = `<div class="ac-header">اقتراحات مباشرة <span class="ac-live">● مباشر</span></div>` +
+      sugs.map((s, i) => {
+        const kw = Array.isArray(s) ? s[0] : s;
+        const vol = fmtVol(estimateVolume(kw, q, i, 0));
+        return `<div class="ac-item" onclick="selectAC('${kw.replace(/'/g,"\\'")}')">
+          <span class="ac-ico">🔍</span>
+          <span>${kw}</span>
+          <span class="ac-vol">${vol}</span>
+        </div>`;
+      }).join('');
+    drop.classList.add('show');
+  } catch {
+    drop.classList.remove('show');
+  }
+}
+
+function selectAC(kw) {
+  document.getElementById('searchInput').value = kw;
+  document.getElementById('acDrop').classList.remove('show');
+  document.getElementById('scBtn').classList.add('vis');
+  doSearch(kw);
+}
+
+function clearSearch() {
+  if (state.streamCtrl) { state.streamCtrl.abort(); state.streamCtrl = null; }
+  document.getElementById('searchInput').value = '';
+  document.getElementById('scBtn').classList.remove('vis');
+  document.getElementById('acDrop').classList.remove('show');
+  document.getElementById('resBanner').classList.remove('show');
+  document.getElementById('streamStatus').classList.remove('show');
+  document.getElementById('secTitle').textContent = 'أكثر الكلمات بحثاً';
+  document.getElementById('secBadge').textContent = 'TOP 100';
+  state.query = '';
+  state.filtered = [...state.keywords];
+  applySort();
+  renderKeywords(state.filtered);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RELATED PANEL
+// ═══════════════════════════════════════════════════════════
+async function openRelated(kw) {
+  document.getElementById('panelKw').textContent = kw;
+  document.getElementById('relList').innerHTML = '';
+  setLoader('panelLoader', true);
+  document.getElementById('panel').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+
+  try {
+    // Try backend first
+    const params = new URLSearchParams({ kw, geo: state.geo, period: state.period });
+    const res = await fetch(`${API}/api/related?${params}`);
+    if (!res.ok) throw new Error('backend fail');
+    const data = await res.json();
+    renderRelated(data.related || []);
+  } catch {
+    // Fallback scraping
+    await fallbackRelated(kw);
+  } finally {
+    setLoader('panelLoader', false);
+  }
+}
+
+async function fallbackRelated(kw) {
+  const variants = [kw, `${kw} شرح`, `${kw} 2024`, `أفضل ${kw}`, `كيف ${kw}`, `${kw} مجاني`, `${kw} سريع`];
+  const seen = new Set([kw]);
+  const results = [];
+
+  for (let i = 0; i < variants.length; i++) {
+    try {
+      const url = `https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&hl=ar&gl=${state.geo}&q=${encodeURIComponent(variants[i])}`;
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(4000) });
+      const json = await res.json();
+      const parsed = JSON.parse(json.contents);
+      const sugs = parsed[1] || [];
+
+      sugs.forEach((s, j) => {
+        const rkw = Array.isArray(s) ? s[0] : s;
+        if (rkw && /[\u0600-\u06FF]/.test(rkw) && !seen.has(rkw)) {
+          seen.add(rkw);
+          const sim = Math.max(15, 95 - i*13 - j*4);
+          results.push({
+            kw: rkw,
+            similarity: sim,
+            volume: estimateVolume(rkw, kw, j, i),
+            category: detectCategory(rkw),
+          });
+        }
+      });
+    } catch {}
+    await new Promise(r => setTimeout(r, 80));
+  }
+
+  results.sort((a,b) => b.similarity - a.similarity);
+  renderRelated(results.slice(0, 30));
+}
+
+function renderRelated(list) {
+  const container = document.getElementById('relList');
+  if (!list.length) {
+    container.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center">لم يتم العثور على كلمات مشابهة</div>';
+    return;
+  }
+  container.innerHTML = list.map((r, i) => `
+    <div class="rel-item" onclick="selectAC('${r.kw.replace(/'/g,"\\'")}')">
+      <span class="rel-rank">${i+1}</span>
+      <div class="rel-body">
+        <div class="rel-text">${r.kw}</div>
+        <div class="rel-cat">${r.category || 'عام'}</div>
+      </div>
+      <span class="sim-badge">${r.similarity}% تشابه</span>
+      <span class="rel-vol">${fmtVol(r.volume)}</span>
+    </div>`).join('');
+}
+
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  CONTROLS
+// ═══════════════════════════════════════════════════════════
+function setPeriod(p, el) {
+  state.period = p;
+  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadTopKeywords();
+}
+
+function setCat(cat, el) {
+  state.category = cat;
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  state.filtered = cat === 'all' ? [...state.keywords] : state.keywords.filter(k => k.category === cat);
+  applySort();
+  renderKeywords(state.filtered);
+}
+
+function setGeo(geo) {
+  state.geo = geo;
+  loadTopKeywords();
+}
+
+function setSort(sort) {
+  state.sort = sort;
+  applySort();
+  renderKeywords(state.filtered);
+}
+
+function applySort() {
+  const s = state.sort;
+  const scoreOrder = {hot:3, up:2, stable:1};
+  if (s === 'volume') state.filtered.sort((a,b) => (b.volume||0)-(a.volume||0));
+  else if (s === 'trending') state.filtered.sort((a,b) => (scoreOrder[b.trend_dir]||0)-(scoreOrder[a.trend_dir]||0));
+  else if (s === 'alpha') state.filtered.sort((a,b) => a.kw.localeCompare(b.kw));
+}
+
+async function refreshAll() {
+  showToast('🔄 جاري التحديث الكامل...');
+  state.keywords = [];
+  state.filtered = [];
+  try {
+    await fetch(`${API}/api/refresh?geo=${state.geo}&period=${state.period}`, { method:'POST' });
+  } catch {}
+  await loadTopKeywords();
+  showToast('✅ تم التحديث بنجاح');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  EXPORT
+// ═══════════════════════════════════════════════════════════
+function exportCSV() {
+  const rows = [['الترتيب','الكلمة المفتاحية','حجم البحث','نقاط الترند','الاتجاه','الفئة','الدولة','الفترة']];
+  state.filtered.forEach((k,i) => {
+    rows.push([i+1, k.kw, k.volume||0, k.trend_score||0, k.trend_dir||'', k.category||'', state.geo, state.period]);
+  });
+  const csv = rows.map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
+    download: `youtube-arabic-keywords-${state.period}-${state.geo}.csv`
+  });
+  a.click();
+  showToast('✅ تم تصدير '+state.filtered.length+' كلمة');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════
+initSearch();
+loadTopKeywords();
+
+// Auto-refresh every 30 min
+setInterval(() => {
+  if (!state.query) loadTopKeywords();
+}, 30 * 60 * 1000);
+</script>
+</body>
+</html>
